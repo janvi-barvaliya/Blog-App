@@ -48,6 +48,7 @@ function Post() {
         </div>
     );
 }
+
   return post ? (
     <div className="py-8">
       <Container>

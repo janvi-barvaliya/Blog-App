@@ -1,6 +1,7 @@
 import conf from "../conf/conf"
 import { Client, Account, ID } from 'appwrite'
 
+
 export class AuthService {
     client = new Client();
     account;
@@ -31,26 +32,32 @@ export class AuthService {
             throw error
         }
     }
-    async getCurrentUser(){
+    async getCurrentUser() {
         try {
-            return await this.account.get()
+            return await this.account.get();
         } catch (error) {
+            if (
+                error?.code === 401 || 
+                error?.response?.code === 401 || 
+                error?.message?.includes("missing scope")
+            ) {
+                // User is not logged in
+                return null;
+            }
+    
             console.log("Appwrite service :: getCurrentUser() :: ", error);
+            return null;
         }
-        return null
     }
     async logout() {
         try {
-            const user = await this.getCurrentUser(); // Check if user is logged in
-            if (user) {
-                await this.account.deleteSessions(); // Only delete sessions if user exists
-            }
+            await this.account.deleteSession('current');  // logout current session only
+            return true;
         } catch (error) {
             console.log("Appwrite service :: logout() :: ", error);
+            return false;
         }
     }
-    
-
 
 }
 
